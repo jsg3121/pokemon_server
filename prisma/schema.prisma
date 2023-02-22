@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator typegraphql {
+  provider        = "typegraphql-prisma"
+  output          = "../src/database/src/type-graphql"
+  useSimpleInputs = true
+}
+
+model Pokemon {
+  id            Int             @id @unique @default(autoincrement()) @db.Integer
+  number        Int             @unique @db.Integer
+  name          String          @db.VarChar(50)
+  type          String[]
+  isRegion      Boolean?        @default(false) @map("is_region")
+  isMega        Boolean?        @default(false) @map("is_mega")
+  typeSingle1   String          @map("type_single1") @db.VarChar(20)
+  typeSingle2   String?         @map("type_single2") @db.VarChar(20)
+  isEvolution   Boolean         @default(false) @map("is_evolution")
+  evolutionId   Int[]           @map("evolution_id") @db.Integer
+  generation    Int             @map("generation") @db.Integer
+  PokemonRegion PokemonRegion[]
+  PokemonMega   PokemonMega[]
+
+  @@map("pokemon")
+}
+
+model PokemonRegion {
+  id            Int      @id @unique @default(autoincrement()) @db.Integer
+  pokemon       Pokemon  @relation(fields: [pokemonId], references: [number])
+  pokemonId     Int      @map("pokemon_id") @db.Integer
+  pokemonNumber Int      @map("pokemon_number")
+  region        String   @db.VarChar(20)
+  type          String[]
+  typeSingle1   String   @map("type_single1") @db.VarChar(20)
+  typeSingle2   String?  @map("type_single2") @db.VarChar(20)
+
+  @@map("pokemon_region")
+}
+
+model PokemonMega {
+  id            Int      @id @unique @default(autoincrement()) @db.Integer
+  pokemon       Pokemon  @relation(fields: [pokemonId], references: [number])
+  pokemonId     Int      @map("pokemon_id") @db.Integer
+  pokemonNumber Int      @map("pokemon_number")
+  type          String[]
+  typeSingle1   String   @map("type_single1") @db.VarChar(20)
+  typeSingle2   String?  @map("type_single2") @db.VarChar(20)
+
+  @@map("pokemon_mega")
+}
+
+model TypeRelation {
+  id         Int     @id @unique @default(autoincrement()) @db.Integer
+  type       String  @db.VarChar(20)
+  strong     String?
+  weak       String?
+  invalidity String?
+
+  @@map("type_relation")
+}
